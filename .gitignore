@@ -1,0 +1,11 @@
+#IDE
+.vs
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+#CMAKE CACHE
+CMakePresets.json
+build

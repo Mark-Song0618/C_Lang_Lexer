@@ -1,0 +1,6 @@
+int main{
+	char  a[6] = "hello";
+	short b;
+	int   c;
+	float d;
+}
