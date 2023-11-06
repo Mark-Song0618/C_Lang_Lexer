@@ -1,3 +1,4 @@
+#pragma once
 #include "ui.h"
 #include <string.h>
 
@@ -29,34 +30,9 @@ typedef enum {
 	TOTAL_STATUS
 } STATUS;
 
-TokenType typeTable[TOTAL_STATUS] =
-{
-	INVALID,
-	ID,
-	INVALID,
-	INVALID,
-	INVALID,
-	BIN,
-	OCT,
-	HEX,
-	DEC,
-	PARENTHESE_LEFT,
-	PARENTHESE_RIGHT,
-	BRACKET_LEFT, 
-	BRACKET_RIGHT,
-	BRACE_LEFT,
-	BRACE_RIGHT,
-	ADD,
-	MINUS,
-	MULTI,
-	DIV,
-	EQUAL,
-	INVALID,
-	STR,
-	INVALID,
-};
-
 typedef STATUS	(*transitHandler)	(char);
+extern transitHandler _transit[TOTAL_STATUS];
+extern TokenType 	  _typeTable[TOTAL_STATUS];
 
 STATUS transit_start(char);
 STATUS transit_ID(char);
@@ -70,37 +46,7 @@ STATUS transit_DEC(char);
 STATUS transit_SINGLE_CHAR(char);
 STATUS transit_UNCLOSE_STR(char);
 
-transitHandler	  _transit[TOTAL_STATUS] = { transit_start,
-											transit_ID,
-											transit_BIN_OCT_HEX,
-											transit_BIN_SIGN,
-											transit_HEX_SIGN,
-											transit_BIN,
-											transit_OCT,
-											transit_HEX,
-											transit_DEC,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_UNCLOSE_STR,
-											transit_SINGLE_CHAR,
-											NULL};
-
-bool	acceptChar(char c);
-
-bool	acceptToken();
-
 bool	isSplitter(char c);
-
-STATUS	transit(STATUS, char);
 
 bool	isAlpha(char);
 

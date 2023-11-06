@@ -1,14 +1,58 @@
 #pragma once
 #include "lexer.h"
+#include "fsm.h"
 #include <stdio.h>
 
-static unsigned		parsedToken			= 0;
-static bool			eof					= false;
-static bool			isSigned			= false;
-static STATUS		currStatus			= ST_START;
-static Token*		result				= NULL;
-static char			buf[MAX_TOKEN_LEN]	= { '\0' };
-static unsigned		pos					= 0;
+TokenType _typeTable[TOTAL_STATUS] =
+{
+	INVALID,
+	ID,
+	INVALID,
+	INVALID,
+	INVALID,
+	BIN,
+	OCT,
+	HEX,
+	DEC,
+	PARENTHESE_LEFT,
+	PARENTHESE_RIGHT,
+	BRACKET_LEFT, 
+	BRACKET_RIGHT,
+	BRACE_LEFT,
+	BRACE_RIGHT,
+	ADD,
+	MINUS,
+	MULTI,
+	DIV,
+	EQUAL,
+	INVALID,
+	STR,
+	INVALID,
+};
+
+transitHandler	  _transit[TOTAL_STATUS] = { transit_start,
+											transit_ID,
+											transit_BIN_OCT_HEX,
+											transit_BIN_SIGN,
+											transit_HEX_SIGN,
+											transit_BIN,
+											transit_OCT,
+											transit_HEX,
+											transit_DEC,
+											transit_SINGLE_CHAR,
+											transit_SINGLE_CHAR,
+											transit_SINGLE_CHAR,
+											transit_SINGLE_CHAR,
+											transit_SINGLE_CHAR,
+											transit_SINGLE_CHAR,
+											transit_SINGLE_CHAR,
+											transit_SINGLE_CHAR,
+											transit_SINGLE_CHAR,
+											transit_SINGLE_CHAR,
+											transit_SINGLE_CHAR,
+											transit_UNCLOSE_STR,
+											transit_SINGLE_CHAR,
+											NULL};
 
 bool ParseFile(const char* fileName, Token* tokens, unsigned maxToken) {
 	FILE* srcFile = fopen(fileName, "r");
@@ -17,100 +61,7 @@ bool ParseFile(const char* fileName, Token* tokens, unsigned maxToken) {
 		return false;
 	}
 
-	result = tokens;
-
-	// 当文件没有解析完，并且token没有填满，就持续地解析
-	while (parsedToken != maxToken && !eof) {
-		char c = fgetc(srcFile);
-		bool result = acceptChar(c);
-		if (result) {
-			continue;
-		}
-		else {
-			result = acceptToken();
-			if (!result) {
-				goto UNRECOGNIZE;
-			}
-			if (isSplitter(c)) {
-				continue;
-			}
-			if (c == EOF) {
-				eof = true;
-				break;
-			}
-			result = acceptChar(c);
-			if (!result) {
-				goto UNRECOGNIZE;
-			}
-
-		}
-	}
-
-	if (!eof) {
-		printf("Buffer readched limit, token recognize stops\r\n");
-	}
-	printf("Token Recognized successfully\r\n");
-	fclose(srcFile);
-
-	return true;
-
-UNRECOGNIZE:
-	printf("unrecognizable character after: %s\r\n", buf);
-	fclose(srcFile);
-	return false;
-}
-
-bool acceptChar(char c) {
-	STATUS ret = transit(currStatus, c);
-	if (ret != ST_UNRECOG) {
-		buf[pos++] = c;
-		currStatus = ret;
-		return true;
-	}
-	return false;
-}
-
-bool acceptToken() {
-	if (*buf == '\0') {
-		return true;	// nothing to parse
-	}
-	else if (typeTable[currStatus] == INVALID) {
-		return false;	// not a token
-	}
-	else {
-		// store recognized token
-		// todo, identify key word
-		Token token;
-		TokenType origType = typeTable[currStatus];
-		if (origType == ID) {
-			TokenType kw = isKeyword(buf);
-			if (kw != INVALID) {
-				token.type = kw;
-			}
-			else {
-				token.type = origType;
-				strcpy(token.value, buf);
-			}
-		}
-		else {
-			if (isSigned == true) {
-				token.type = signedType(origType);
-				strcpy(token.value, buf);
-			}
-			else {
-				token.type = origType;
-				strcpy(token.value, buf);
-			}
-		}
-		result[parsedToken++] = token;
-		
-		// reset
-		strset(buf, '\0');
-		pos = 0;
-		currStatus = ST_START;
-		isSigned   = false;
-		return true;
-	}
+	return fsm_run(srcFile, tokens, maxToken);
 }
 
 bool isSplitter(char c)
@@ -134,11 +85,6 @@ bool isSplitter(char c)
 	//		comments, like int a/*this is a comment*/.
 	//		operator, like a+b
 	return false;
-}
-
-STATUS transit(STATUS status , char c)
-{
-	return _transit[status](c);
 }
 
 bool isAlpha(char c)

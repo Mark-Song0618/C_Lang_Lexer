@@ -1,5 +1,5 @@
-set(sources lexer.c)
-set(headers lexer.h ui.h)
+set(sources lexer.c fsm.c)
+set(headers lexer.h ui.h fsm.h)
 
 add_library(lexer
 	SHARED
