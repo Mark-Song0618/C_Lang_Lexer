@@ -1,6 +1,8 @@
 int main{
 	char  a[6] = "hello";
-	short b;
-	int   c;
+	short b	/*
+		multi line Comment
+	*/;
+	int   c;	// single line Comment
 	float d;
 }

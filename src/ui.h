@@ -45,7 +45,9 @@ typedef enum {
 	SIGNED_OCT,			// -0...	28
 	SIGNED_DEC,			// -...		29
 	SIGNED_HEX,			// -0x...	30
-	STR					// "..."	31
+	STR,				// "..."	31
+	SEMICOLON,			// ;		32
+	COMMENT,			// /**/ or //
 }TokenType;
 
 typedef struct {

@@ -29,6 +29,9 @@ bool acceptToken() {
 	if (*buf == '\0') {
 		return true;	// nothing to parse
 	}
+	if (isComment(currStatus)) {
+		goto RESET;	// comment need not to parse
+	}
 	else if (_typeTable[currStatus] == INVALID) {
 		return false;	// not a token
 	}
@@ -59,7 +62,7 @@ bool acceptToken() {
 		}
 		result[parsedToken++] = token;
 		
-		// reset
+RESET:
 		strset(buf, '\0');
 		pos = 0;
 		currStatus = ST_START;

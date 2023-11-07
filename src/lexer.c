@@ -25,34 +25,46 @@ TokenType _typeTable[TOTAL_STATUS] =
 	MULTI,
 	DIV,
 	EQUAL,
+	SEMICOLON,
 	INVALID,
 	STR,
 	INVALID,
+	INVALID,
+	COMMENT,
+	COMMENT,
+	COMMENT,
+	INVALID
 };
 
-transitHandler	  _transit[TOTAL_STATUS] = { transit_start,
-											transit_ID,
-											transit_BIN_OCT_HEX,
-											transit_BIN_SIGN,
-											transit_HEX_SIGN,
-											transit_BIN,
-											transit_OCT,
-											transit_HEX,
-											transit_DEC,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_SINGLE_CHAR,
-											transit_UNCLOSE_STR,
-											transit_SINGLE_CHAR,
-											NULL};
+transitHandler	  _transit[TOTAL_STATUS] = { transit_start,				// ST_START
+											transit_ID,					// ST_ID
+											transit_BIN_OCT_HEX,		// ST_BIN_OCT_HEX
+											transit_BIN_SIGN,			// ST_BIN_SIGN
+											transit_HEX_SIGN,			// ST_HEX_SIGN
+											transit_BIN,				// ST_BIN
+											transit_OCT,				// ST_OCT
+											transit_HEX,				// ST_HEX
+											transit_DEC,				// ST_DEC
+											transit_SINGLE_CHAR,		// ST_PARENTHESE_LEFT
+											transit_SINGLE_CHAR,		// ST_PARENTHESE_RIGHT
+											transit_SINGLE_CHAR,		// ST_BRACKET_LEFT
+											transit_SINGLE_CHAR,		// ST_BRACKET_RIGHT
+											transit_SINGLE_CHAR,		// ST_BRACE_LEFT
+											transit_SINGLE_CHAR,		// ST_BRACE_RIGHT
+											transit_SINGLE_CHAR,		// ST_ADD
+											transit_SINGLE_CHAR,		// ST_MINUS
+											transit_SINGLE_CHAR,		// ST_MULTI
+											transit_SLASH,				// ST_DIV
+											transit_SINGLE_CHAR,		// ST_EQU 
+											transit_SINGLE_CHAR,		// ST_SEMICOLON
+											transit_UNCLOSE_STR,		// ST_UNCLOSE_STR
+											transit_SINGLE_CHAR,		// ST_STR
+											transit_SLASH_STAR,			// ST_SLASH_STAR
+											transit_SLASH_STAR_STAR,	// ST_SLASH_STAR_STAR
+											transit_SINGLE_CHAR,		// ST_MULTI_LINE_COMMENT
+											transit_SLASH_SLASH,		// ST_SLASH_SLASH
+											transit_SINGLE_CHAR,		// ST_SINGLE_LINE_COMMENT
+											NULL};						// ST_UNRECOG
 
 bool ParseFile(const char* fileName, Token* tokens, unsigned maxToken) {
 	FILE* srcFile = fopen(fileName, "r");
@@ -78,12 +90,16 @@ bool isSplitter(char c)
 	if (c == '\n') {
 		return true;
 	}
-	if (c == ';') {
-		return true;
-	}
 	// todo:
 	//		comments, like int a/*this is a comment*/.
 	//		operator, like a+b
+	return false;
+}
+
+bool isComment(STATUS s) {
+	if (s == ST_SLASH_SLASH || s == ST_SINGLE_LINE_COMMENT || s == ST_MULTI_LINE_COMMENT) {
+		return true;
+	}
 	return false;
 }
 
@@ -283,6 +299,9 @@ bool isKeywordType(TokenType type)
 	if (type == BRACE_RIGHT) {
 		return true;
 	}
+	if (type == SEMICOLON) {
+		return true;
+	}
 	return false;
 }
 
@@ -353,6 +372,9 @@ STATUS transit_start(char c)
 	}
 	if (c == '"') {
 		return ST_UNCLOSE_STR;
+	}
+	if (c == ';') {
+		return ST_SEMICOLON;
 	}
 	return ST_UNRECOG;
 }
@@ -450,4 +472,45 @@ STATUS transit_OCT(char c)
 STATUS transit_SINGLE_CHAR(char c)
 {
 	return ST_UNRECOG;
+}
+
+STATUS transit_SLASH(char c)
+{
+	if (c == '*') {
+		return ST_SLASH_STAR;
+	}
+	if (c == '/') {
+		return ST_SLASH_SLASH;
+	}
+	return ST_UNRECOG;
+}
+
+STATUS transit_SLASH_STAR(char c)
+{
+	if (c == '*') {
+		return ST_SLASH_STAR_STAR;
+	}
+	return ST_SLASH_STAR;
+}
+
+STATUS transit_SLASH_STAR_STAR(char c)
+{
+	if (c == '/') {
+		return ST_MULTI_LINE_COMMENT;
+	}
+	if (c == '*') {
+		return ST_SLASH_STAR_STAR;
+	}
+	return ST_SLASH_STAR;
+}
+
+STATUS transit_SLASH_SLASH(char c)
+{
+	if (c == '\r' || c == '\n') {
+		return ST_SINGLE_LINE_COMMENT;
+	}
+	if (c == EOF) {
+		return ST_UNRECOG; // will accept recognized str as comment
+	} 
+	return ST_SLASH_SLASH;
 }

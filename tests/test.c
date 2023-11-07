@@ -12,18 +12,13 @@ int main() {
 	}
 
 	//char * golden ="322main20122a18256191131hello222b322c522d21";
-	char* golden = " 3 22main 20 1 22a 18 256 19 11= 31\"hello\" 2 22b 3 22c 5 22d 21";
+	char* golden = " 3 22main 20 1 22a 18 256 19 11= 31\"hello\" 32 2 22b 32 3 22c 32 5 22d 32 21";
 	char values[1024] = { '\0' };
 	int len = 0;
 	for (int i = 0; i < 128; ++i) {
 		if (tokens[i].type == INVALID) {
 			break;
 		}
-		/*printf("token index: %d\r\n", i);
-		printf("\tType: %d\r\n", tokens[i].type);
-		if (!isKeywordType(tokens[i].type)) {
-			printf("\tValue: %s\r\n", tokens[i].value);
-		}*/
 		char value[1024];
 		sprintf(value, " %d", tokens[i].type);
 		strcat(values, value);

@@ -24,8 +24,14 @@ typedef enum {
 	ST_MULTI,
 	ST_DIV,
 	ST_EQU,
+	ST_SEMICOLON,
 	ST_UNCLOSE_STR,
 	ST_STR,
+	ST_SLASH_STAR,
+	ST_SLASH_STAR_STAR,
+	ST_MULTI_LINE_COMMENT,
+	ST_SLASH_SLASH,
+	ST_SINGLE_LINE_COMMENT,
 	ST_UNRECOG,
 	TOTAL_STATUS
 } STATUS;
@@ -45,6 +51,10 @@ STATUS transit_HEX(char);
 STATUS transit_DEC(char);
 STATUS transit_SINGLE_CHAR(char);
 STATUS transit_UNCLOSE_STR(char);
+STATUS transit_SLASH(char);
+STATUS transit_SLASH_STAR(char);
+STATUS transit_SLASH_STAR_STAR(char);
+STATUS transit_SLASH_SLASH(char);
 
 bool	isSplitter(char c);
 
@@ -63,3 +73,5 @@ bool	isHexadecimal(char);
 bool	isKeyword(const char*);
 
 TokenType signedType(TokenType);
+
+bool	isComment(STATUS);
